@@ -1,6 +1,8 @@
 # Habit Studio by Arianne — online store
 
-A static storefront for **Habit Studio by Arianne** (Quezon City · Official HTP Basics Distributor), built around their real listing: the **5-Pocket Unifit Scrub Suit, ₱950**, in twelve shades.
+A static storefront for **Habit Studio by Arianne** (Quezon City · Official HTP Basics Distributor), built around their real listings: the **5-Pocket Unifit Scrub Suit, ₱950**, in twelve shades, and the **HTP Basics Premium Basic Tee** (Aqua, Olive, Red, Sage Green, Taupe; women's ₱450, men's ₱490; XS–3XL).
+
+New products go in `src/data/products.ts`. Tees are separate products per cut (`tee-women-aqua`, `tee-men-aqua`) so the bag and checkout need no changes; the product page links the two cuts with a Women / Men switch.
 
 React 19 · Vite · TypeScript · Tailwind CSS v4 · Motion · GSAP ScrollTrigger · Lenis · Zustand · Lucide
 
@@ -21,6 +23,8 @@ All product images are Habit Studio's own photos from their Facebook page. `npm 
 | --- | --- |
 | `unifit-midnight-black` … `unifit-merlot-maroon` | 8 model shots, one per shade |
 | `unifit-collection-flatlay` | flat-lay of the collection (also used for close-ups and the 4 shades without a model shot) |
+| `tee-women-*`, `tee-men-*` | basic tee model shots, one per color and cut |
+| `tee-size-guide-women`, `tee-size-guide-men` | HTP Basics' tee size guides (the numbers are also typed into the site's size table) |
 | `brand-cover` | Facebook cover graphic |
 | `brand-logo` | profile logo (200px only — the site uses a redrawn SVG monogram instead) |
 

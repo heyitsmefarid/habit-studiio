@@ -46,7 +46,7 @@ export function CartDrawer() {
             <div className="flex items-center justify-between border-b border-line px-6 py-5">
               <div className="flex items-baseline gap-3">
                 <h2 className="display text-3xl italic">Your bag</h2>
-                <span className="eyebrow text-mute">{qty} {qty === 1 ? 'set' : 'sets'}</span>
+                <span className="eyebrow text-mute">{qty} {qty === 1 ? 'item' : 'items'}</span>
               </div>
               <button ref={closeRef} onClick={() => setOpen(false)} className="-mr-2 p-2" aria-label="Close bag">
                 <X className="size-5" strokeWidth={1.4} />
@@ -55,7 +55,7 @@ export function CartDrawer() {
 
             {FREE_SHIPPING_MIN_QTY > 0 && qty > 0 && (
               <div className="border-b border-line px-6 py-4">
-                <p className="text-sm">{freeShip ? 'Free shipping unlocked. Salamat!' : `Add ${left} more ${left === 1 ? 'set' : 'sets'} for free shipping.`}</p>
+                <p className="text-sm">{freeShip ? 'Free shipping unlocked. Salamat!' : `Add ${left} more ${left === 1 ? 'item' : 'items'} for free shipping.`}</p>
                 <div className="mt-3 flex h-1 gap-1" aria-hidden>
                   {Array.from({ length: FREE_SHIPPING_MIN_QTY }).map((_, i) => (
                     <motion.span key={i} className="flex-1 origin-left bg-ink" initial={false} animate={{ scaleX: i < qty ? 1 : 0, opacity: 1 }} style={{ background: i < qty ? items[i % items.length]?.product.shade.hex : undefined }} transition={{ duration: 0.6, ease }} />
@@ -73,7 +73,7 @@ export function CartDrawer() {
                     ))}
                   </div>
                   <p className="display text-3xl italic">Nothing here yet.</p>
-                  <p className="max-w-xs text-sm text-ink-2">Twelve shades are waiting. Find the one that matches your shift.</p>
+                  <p className="max-w-xs text-sm text-ink-2">Twelve scrub shades and five everyday tees are waiting. Find your color.</p>
                   <Link to="/shop" onClick={() => setOpen(false)} className="eyebrow border-b border-ink pb-1">
                     Browse the collection
                   </Link>
@@ -84,7 +84,7 @@ export function CartDrawer() {
                     {items.map((it) => (
                       <motion.li key={it.slug + it.size} layout exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.4 }} className="flex gap-4 px-6 py-5">
                         <Link to={`/product/${it.slug}`} onClick={() => setOpen(false)} className="shrink-0">
-                          <ShadeImage photo={it.product.shade.photo} crop={it.product.shade.crop} tint={it.product.shade.hex} alt={`${it.product.shade.name} scrub suit`} className="h-28 w-[88px]" sizes="100px" />
+                          <ShadeImage photo={it.product.shade.photo} crop={it.product.shade.crop} tint={it.product.shade.hex} alt={`${it.product.shade.name} ${it.product.name}`} className="h-28 w-[88px]" sizes="100px" />
                         </Link>
                         <div className="flex min-w-0 flex-1 flex-col">
                           <div className="flex items-start justify-between gap-3">

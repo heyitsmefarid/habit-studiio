@@ -24,7 +24,8 @@ export function Footer() {
           <div>
             <p className="eyebrow mb-4 text-bone/40">Shop</p>
             <ul className="space-y-2 text-sm">
-              <li><Link className="link-underline" to="/shop">All shades</Link></li>
+              <li><Link className="link-underline" to="/shop">Everything</Link></li>
+              <li><Link className="link-underline" to="/shop?line=tee">Basic tees</Link></li>
               <li><Link className="link-underline" to="/shop?mood=soft">Soft &amp; Classy</Link></li>
               <li><Link className="link-underline" to="/shop?mood=bold">Bold &amp; Beautiful</Link></li>
               <li><Link className="link-underline" to="/shop?mood=deep">Deep &amp; Grounded</Link></li>

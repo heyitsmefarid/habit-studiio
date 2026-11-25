@@ -1,11 +1,12 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { X } from 'lucide-react'
 import { useEffect } from 'react'
-import { SIZE_CHART, type Size } from '../data/products'
+import type { Size, SizeGuideData } from '../data/products'
 import { cx } from '../lib/format'
 import { useScrollLock } from '../lib/smooth'
+import { ShadeImage } from './ShadeImage'
 
-export function SizeGuide({ open, onClose, highlight }: { open: boolean; onClose: () => void; highlight?: Size | null }) {
+export function SizeGuide({ open, onClose, highlight, guide }: { open: boolean; onClose: () => void; highlight?: Size | null; guide: SizeGuideData }) {
   useScrollLock(open)
   useEffect(() => {
     if (!open) return
@@ -22,7 +23,8 @@ export function SizeGuide({ open, onClose, highlight }: { open: boolean; onClose
             role="dialog"
             aria-modal="true"
             aria-labelledby="sg-title"
-            className="relative w-full max-w-2xl bg-paper p-6 md:p-10"
+            className="relative max-h-[92svh] w-full max-w-2xl overflow-y-auto overscroll-contain bg-paper p-6 md:p-10"
+            data-lenis-prevent
             initial={{ y: 60, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 60, opacity: 0 }}
@@ -30,7 +32,7 @@ export function SizeGuide({ open, onClose, highlight }: { open: boolean; onClose
           >
             <div className="flex items-start justify-between">
               <div>
-                <p className="eyebrow text-mute">Unifit Scrub Suit</p>
+                <p className="eyebrow text-mute">{guide.title}</p>
                 <h2 id="sg-title" className="display mt-2 text-4xl italic">
                   Size guide
                 </h2>
@@ -41,32 +43,31 @@ export function SizeGuide({ open, onClose, highlight }: { open: boolean; onClose
             </div>
             <div className="mt-6 overflow-x-auto">
               <table className="w-full min-w-[420px] text-left text-sm">
-                <caption className="sr-only">Garment measurements in inches</caption>
+                <caption className="sr-only">{guide.caption}</caption>
                 <thead>
                   <tr className="eyebrow border-b border-line text-mute">
-                    <th className="py-3 font-normal">Size</th>
-                    <th className="py-3 font-normal">Top chest</th>
-                    <th className="py-3 font-normal">Top length</th>
-                    <th className="py-3 font-normal">Waist (stretch)</th>
-                    <th className="py-3 font-normal">Inseam</th>
+                    <th className="py-3 pr-3 font-normal">Size</th>
+                    {guide.columns.map((c) => (
+                      <th key={c} className="py-3 pr-3 font-normal">{c}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody className="font-mono">
-                  {SIZE_CHART.map((r) => (
+                  {guide.rows.map((r) => (
                     <tr key={r.size} className={cx('border-b border-line', highlight === r.size && 'bg-sand/60')}>
-                      <th scope="row" className="py-3 font-sans font-medium">{r.size}</th>
-                      <td>{r.chest}″</td>
-                      <td>{r.length}″</td>
-                      <td>{r.waist}″</td>
-                      <td>{r.inseam}″</td>
+                      <th scope="row" className="py-3 pr-3 font-sans font-medium">{r.size}</th>
+                      {r.values.map((v, i) => (
+                        <td key={i} className="pr-3">{v}″</td>
+                      ))}
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <p className="mt-5 text-xs leading-relaxed text-ink-2">
-              The Unifit is a relaxed, unisex cut. Between sizes? Size down for a neater fit, or up for more room on long shifts. Measurements are approximate — message us your height and usual size and we’ll help you choose.
-            </p>
+            <p className="mt-5 text-xs leading-relaxed text-ink-2">{guide.note}</p>
+            {guide.photo && (
+              <ShadeImage photo={guide.photo} alt={`${guide.title} size guide from HTP Basics`} className="mt-6 aspect-square w-full max-w-md" position="50% 50%" sizes="448px" />
+            )}
           </motion.div>
         </div>
       )}

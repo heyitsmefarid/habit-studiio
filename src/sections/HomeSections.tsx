@@ -6,8 +6,8 @@ import { Cross } from '../components/Brand'
 import { FadeIn, Marquee, SplitReveal } from '../components/Reveal'
 import { ShadeImage } from '../components/ShadeImage'
 import { STORE } from '../config/store'
-import { MOODS, PRICE, PRODUCT_DETAILS, SHADES, type Mood } from '../data/products'
-import { cx, pad, peso } from '../lib/format'
+import { FIT_LABEL, MOODS, PRICE, PRODUCT_DETAILS, SHADES, TEE_COLORS, TEE_PRICE, teePhoto, type Mood } from '../data/products'
+import { cx, mix, pad, peso } from '../lib/format'
 import { lightness } from '../lib/search'
 import { useCart } from '../store/cart'
 
@@ -307,6 +307,74 @@ export function Collections() {
   )
 }
 
+/* ───────────────── New: basic tee ───────────────── */
+export function TeeTeaser() {
+  const [i, setI] = useState(0)
+  const c = TEE_COLORS[i]
+  return (
+    <motion.section
+      aria-labelledby="tee-title"
+      className="relative overflow-hidden"
+      animate={{ backgroundColor: mix(c.hex, '#f1ece3', 0.82) }}
+      transition={{ duration: 0.9, ease }}
+    >
+      <div className="mx-auto grid max-w-[1600px] gap-10 px-5 py-24 md:px-10 md:py-32 lg:grid-cols-12 lg:items-center">
+        <div className="min-w-0 lg:col-span-5">
+          <p className="eyebrow text-mute">N°06 — New in · HTP Basics</p>
+          <h2 id="tee-title" className="display mt-5 text-5xl md:text-7xl">
+            Your everyday <span className="italic">go-to tee</span> is here.
+          </h2>
+          <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ink-2">
+            Simple, comfy, and easy to style. Firm, soft cotton in a regular fit, cut for women and for men, XS to 3XL.
+          </p>
+
+          <div className="mt-8">
+            <p className="eyebrow mb-3 flex justify-between">
+              <span>Color</span>
+              <span className="text-mute">{c.name}</span>
+            </p>
+            <div className="flex gap-2" role="group" aria-label="Choose a tee color">
+              {TEE_COLORS.map((t, n) => (
+                <button key={t.id} aria-pressed={n === i} aria-label={t.name} onClick={() => setI(n)} className="grid size-10 place-items-center">
+                  <span className={cx('size-7 rounded-full transition-transform duration-500', n === i && 'scale-[1.2] ring-1 ring-ink ring-offset-2 ring-offset-bone')} style={{ background: t.hex }} />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-8 grid gap-2 sm:grid-cols-2">
+            {(['women', 'men'] as const).map((fit) => (
+              <Link key={fit} to={`/product/tee-${fit}-${c.id}`} className="group flex h-14 items-center justify-between bg-ink px-5 text-bone">
+                <span className="eyebrow">Shop {FIT_LABEL[fit].toLowerCase()}’s</span>
+                <span className="flex items-center gap-3 font-mono text-sm">
+                  {peso(TEE_PRICE[fit])}
+                  <ArrowRight className="size-4 transition-transform duration-500 group-hover:translate-x-1" strokeWidth={1.4} />
+                </span>
+              </Link>
+            ))}
+          </div>
+          <Link to="/shop?line=tee" className="eyebrow mt-5 inline-block border-b border-ink pb-1">
+            All basic tees
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 md:gap-5 lg:col-span-7">
+          {(['women', 'men'] as const).map((fit, n) => (
+            <Link key={fit} to={`/product/tee-${fit}-${c.id}`} className={cx('relative block aspect-[4/5] overflow-hidden', n === 1 && 'mt-10 md:mt-16')} aria-label={`${FIT_LABEL[fit]}’s Basic Tee in ${c.name}`}>
+              <AnimatePresence initial={false}>
+                <motion.div key={c.id} className="absolute inset-0" initial={{ clipPath: 'inset(0 0 0 100%)' }} animate={{ clipPath: 'inset(0 0 0 0%)' }} exit={{ opacity: 0 }} transition={{ duration: 0.9, ease, delay: n * 0.08 }}>
+                  <ShadeImage photo={teePhoto(fit, c.id)} tint={c.hex} alt={`Model wearing the ${FIT_LABEL[fit].toLowerCase()}’s Basic Tee in ${c.name}`} className="absolute inset-0" position="50% 18%" sizes="(min-width: 1024px) 28vw, 50vw" />
+                </motion.div>
+              </AnimatePresence>
+              <span className="eyebrow absolute bottom-3 left-3 bg-paper/90 px-2 py-1 text-[10px]">{FIT_LABEL[fit]}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </motion.section>
+  )
+}
+
 /* ───────────────── Lookbook teaser ───────────────── */
 export function LookbookTeaser() {
   const ref = useRef<HTMLElement>(null)
@@ -324,7 +392,7 @@ export function LookbookTeaser() {
       <div className="mx-auto max-w-[1600px] px-5 md:px-10">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="eyebrow text-mute">N°06 — Lookbook</p>
+            <p className="eyebrow text-mute">N°07 — Lookbook</p>
             <SplitReveal as="h2" text="A day in the Unifit." className="display mt-5 block text-6xl italic md:text-8xl" />
           </div>
           <Link to="/lookbook" className="group eyebrow flex h-12 items-center gap-3 bg-ink px-6 text-bone">

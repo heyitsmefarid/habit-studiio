@@ -6,6 +6,7 @@ import { Page } from '../components/Page'
 import { ShadeImage } from '../components/ShadeImage'
 import { GCASH, STORE } from '../config/store'
 import { lineItems } from '../store/cart'
+import { colorLabel } from '../data/products'
 import { useOrders, type Order } from '../store/orders'
 import { cx, peso } from '../lib/format'
 import NotFound from './NotFound'
@@ -20,7 +21,7 @@ const summaryText = (o: Order) => {
     `Placed: ${new Date(o.createdAt).toLocaleString('en-PH')}`,
     '',
     'ITEMS',
-    ...items.map((i) => `• ${i.qty} × Unifit Scrub Suit — ${i.product.shade.name} (${i.product.shade.plain}), size ${i.size} — ${peso(i.total)}`),
+    ...items.map((i) => `• ${i.qty} × ${i.product.name} — ${colorLabel(i.product)}, size ${i.size} — ${peso(i.total)}`),
     '',
     `Subtotal: ${peso(o.totals.subtotal)}`,
     `Shipping (${o.address.region}): ${o.totals.shipping ? peso(o.totals.shipping) : 'Free'}`,
@@ -78,7 +79,7 @@ export default function OrderConfirmed() {
               <span className="italic">{first}.</span>
             </h1>
             <p className="mt-6 max-w-lg text-lg text-ink-2">
-              {gcash ? `We’ve got your GCash reference (${order.payment.method === 'gcash' ? order.payment.reference : ''}). One last step so we can verify it and pack your scrubs:` : 'Your Cash on Delivery order is ready. One last step so we can confirm and pack it:'}
+              {gcash ? `We’ve got your GCash reference (${order.payment.method === 'gcash' ? order.payment.reference : ''}). One last step so we can verify it and pack your order:` : 'Your Cash on Delivery order is ready. One last step so we can confirm and pack it:'}
             </p>
 
             {/* send step */}
@@ -129,7 +130,7 @@ export default function OrderConfirmed() {
                     <div className="flex-1">
                       <p className="display text-xl">{it.product.shade.name}</p>
                       <p className="eyebrow text-mute">
-                        {it.qty} × size {it.size}
+                        {it.product.line === 'tee' ? `${it.product.name} · ` : ''}{it.qty} × size {it.size}
                       </p>
                     </div>
                     <p className="font-mono text-sm">{peso(it.total)}</p>

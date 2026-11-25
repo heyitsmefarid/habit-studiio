@@ -2,12 +2,12 @@ import { AnimatePresence, motion } from 'motion/react'
 import { ArrowUpRight, Search, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MOODS } from '../data/products'
+import { subtitle } from '../data/products'
 import { peso } from '../lib/format'
 import { searchProducts } from '../lib/search'
 import { useScrollLock } from '../lib/smooth'
 
-const SUGGEST = ['pink', 'night shift', 'blue', 'soft', 'nurses', 'black', 'bold']
+const SUGGEST = ['pink', 'night shift', 'blue', 'tee', 'nurses', 'black', 'men']
 
 export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [q, setQ] = useState('')
@@ -91,7 +91,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
           <div className="mx-auto mt-6 w-full max-w-5xl flex-1 overflow-y-auto px-5 pb-10 md:px-10" data-lenis-prevent>
             {q && (
               <p className="eyebrow mb-4 text-mute" aria-live="polite">
-                {results.length} {results.length === 1 ? 'shade' : 'shades'} found
+                {results.length} {results.length === 1 ? 'result' : 'results'} found
               </p>
             )}
             <ul id="search-results" role="listbox" className="divide-y divide-line">
@@ -108,9 +108,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                     <span className="size-12 shrink-0 rounded-full transition-transform duration-500 group-aria-selected:scale-110" style={{ background: p.shade.hex }} />
                     <span className="flex-1">
                       <span className="display block text-3xl">{p.shade.name}</span>
-                      <span className="eyebrow text-mute">
-                        {p.shade.plain} · {MOODS[p.shade.mood].title}
-                      </span>
+                      <span className="eyebrow text-mute">{subtitle(p)}</span>
                     </span>
                     <span className="hidden font-mono text-sm md:block">{peso(p.price)}</span>
                     <ArrowUpRight className="size-5 opacity-0 transition-opacity group-aria-selected:opacity-100" strokeWidth={1.4} />
@@ -118,7 +116,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                 </motion.li>
               ))}
             </ul>
-            {q && results.length === 0 && <p className="display mt-10 text-3xl italic text-ink-2">No shade by that name — yet. Try a color like “blue” or “maroon”.</p>}
+            {q && results.length === 0 && <p className="display mt-10 text-3xl italic text-ink-2">Nothing by that name — yet. Try a color like “blue” or “maroon”, or “tee”.</p>}
           </div>
         </motion.div>
       )}

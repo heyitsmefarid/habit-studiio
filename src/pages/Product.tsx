@@ -7,7 +7,7 @@ import { ProductCard } from '../components/ProductCard'
 import { ShadeImage } from '../components/ShadeImage'
 import { SizeGuide } from '../components/SizeGuide'
 import { COD, FREE_SHIPPING_MIN_QTY, SHIPPING, STORE } from '../config/store'
-import { MOODS, PRODUCT_DETAILS, PRODUCTS, SHADES, getProduct, type Size } from '../data/products'
+import { FIT_LABEL, LINES, MOODS, PRODUCT_DETAILS, TEE_DETAILS, colorLabel, getProduct, otherFit, siblings, sizeGuideFor, type PhotoName, type Size } from '../data/products'
 import { cx, mix, pad, peso } from '../lib/format'
 import { useCart } from '../store/cart'
 import NotFound from './NotFound'
@@ -33,9 +33,14 @@ function ProductView({ slug }: { slug: string }) {
   const [added, setAdded] = useState(false)
   const [openTab, setOpenTab] = useState<string | null>('details')
   const sizeRef = useRef<HTMLFieldSetElement>(null)
-  const idx = SHADES.indexOf(shade)
+  const tee = product.line === 'tee'
+  const range = siblings(product)
+  const idx = range.indexOf(product)
   const modeled = !shade.crop
   const tint = mix(shade.hex, '#f1ece3', 0.9)
+  const details = tee ? TEE_DETAILS : PRODUCT_DETAILS
+  const guideData = sizeGuideFor(product)
+  const counterpart = otherFit(product)
 
   useEffect(() => {
     if (!added) return
@@ -53,15 +58,23 @@ function ProductView({ slug }: { slug: string }) {
     setAdded(true)
   }
 
-  const gallery = [
-    { key: 'main', photo: shade.photo, crop: shade.crop, alt: modeled ? `Model wearing the ${shade.name} Unifit Scrub Suit` : `${shade.name} Unifit Scrub top, folded`, label: modeled ? 'On model' : 'Flat-lay' },
-    { key: 'detail', photo: shade.detailPhoto ?? ('unifit-collection-flatlay' as const), crop: { ...shade.flatlay, zoom: modeled ? shade.flatlay.zoom : 4.2 }, alt: `Close-up of the ${shade.name} fabric and V-neck`, label: 'Close-up' },
-    { key: 'collection', photo: 'unifit-collection-flatlay' as const, crop: undefined, alt: 'The full Unifit collection in twelve shades', label: 'The collection' },
-  ]
+  type Shot = { key: string; photo: PhotoName; crop?: { x: number; y: number; zoom: number }; alt: string; label: string; position?: string }
+  const gallery: Shot[] = tee
+    ? [
+        { key: 'main', photo: shade.photo, alt: `Model wearing the ${product.name} in ${shade.name}`, label: `${FIT_LABEL[product.fit!]}’s fit`, position: '50% 20%' },
+        ...(counterpart ? [{ key: 'other', photo: counterpart.shade.photo, alt: `Model wearing the ${counterpart.name} in ${shade.name}`, label: `${FIT_LABEL[counterpart.fit!]}’s fit`, position: '50% 20%' }] : []),
+        { key: 'guide', photo: guideData.photo!, alt: `${guideData.title} size guide from HTP Basics`, label: 'Size guide', position: '50% 50%' },
+      ]
+    : [
+        { key: 'main', photo: shade.photo, crop: shade.crop, alt: modeled ? `Model wearing the ${shade.name} Unifit Scrub Suit` : `${shade.name} Unifit Scrub top, folded`, label: modeled ? 'On model' : 'Flat-lay', position: '50% 28%' },
+        ...(shade.flatlay ? [{ key: 'detail', photo: shade.detailPhoto ?? ('unifit-collection-flatlay' as const), crop: { ...shade.flatlay, zoom: modeled ? shade.flatlay.zoom : 4.2 }, alt: `Close-up of the ${shade.name} fabric and V-neck`, label: 'Close-up' }] : []),
+        { key: 'collection', photo: 'unifit-collection-flatlay', alt: 'The full Unifit collection in twelve shades', label: 'The collection' },
+      ]
 
-  const related = PRODUCTS.filter((p) => p.shade.mood === shade.mood && p.slug !== slug).slice(0, 3)
-  const prev = PRODUCTS[(idx - 1 + PRODUCTS.length) % PRODUCTS.length]
-  const next = PRODUCTS[(idx + 1) % PRODUCTS.length]
+  const related = (tee ? range : range.filter((p) => p.shade.mood === shade.mood)).filter((p) => p.slug !== slug).slice(0, 3)
+  const prev = range[(idx - 1 + range.length) % range.length]
+  const next = range[(idx + 1) % range.length]
+  const crumb = tee ? { to: '/shop?line=tee', label: LINES.tee.title } : { to: `/shop?mood=${shade.mood}`, label: MOODS[shade.mood].title }
 
   const tabs = [
     {
@@ -69,9 +82,9 @@ function ProductView({ slug }: { slug: string }) {
       label: 'Details',
       body: (
         <>
-          <p>{PRODUCT_DETAILS.summary}</p>
+          <p>{details.summary}</p>
           <dl className="mt-4 divide-y divide-line border-y border-line">
-            {PRODUCT_DETAILS.features.map((f) => (
+            {details.features.map((f) => (
               <div key={f.k} className="flex justify-between gap-6 py-2.5">
                 <dt className="eyebrow text-mute">{f.k}</dt>
                 <dd className="text-right">{f.v}</dd>
@@ -86,7 +99,9 @@ function ProductView({ slug }: { slug: string }) {
       label: 'Size & fit',
       body: (
         <p>
-          Relaxed, unisex Unifit cut in sizes XS to 2XL. Between sizes, go down for a neater look or up for extra room.{' '}
+          {tee
+            ? `Regular fit with slight stretch, in HTP Basics sizes XS, SM, ML, XL, 2XL and 3XL. The ${product.fit === 'women' ? 'women’s tee is cut slimmer and shorter' : 'men’s tee is cut longer and wider'} — check the measurements before you order.`
+            : 'Relaxed, unisex Unifit cut in sizes XS to 2XL. Between sizes, go down for a neater look or up for extra room.'}{' '}
           <button className="underline underline-offset-4" onClick={() => setGuide(true)}>
             See the size guide
           </button>
@@ -94,14 +109,14 @@ function ProductView({ slug }: { slug: string }) {
         </p>
       ),
     },
-    { id: 'care', label: 'Care', body: <ul className="list-inside list-disc space-y-1">{PRODUCT_DETAILS.care.map((c) => <li key={c}>{c}</li>)}</ul> },
+    { id: 'care', label: 'Care', body: <ul className="list-inside list-disc space-y-1">{details.care.map((c) => <li key={c}>{c}</li>)}</ul> },
     {
       id: 'delivery',
       label: 'Delivery & payment',
       body: (
         <ul className="space-y-2">
           <li>Ships from {STORE.city}. Metro Manila from {peso(SHIPPING['Metro Manila'])}, provincial from {peso(SHIPPING['North & South Luzon'])}.</li>
-          {FREE_SHIPPING_MIN_QTY > 0 && <li>Free shipping on {FREE_SHIPPING_MIN_QTY} sets or more.</li>}
+          {FREE_SHIPPING_MIN_QTY > 0 && <li>Free shipping on {FREE_SHIPPING_MIN_QTY} items or more.</li>}
           <li>Pay with GCash — send to our number and enter your reference number at checkout.</li>
           {COD.enabled && <li>Cash on Delivery available. {COD.note}</li>}
         </ul>
@@ -110,7 +125,7 @@ function ProductView({ slug }: { slug: string }) {
   ]
 
   return (
-    <Page title={`${shade.name} Unifit Scrub Suit`} tint={shade.hex}>
+    <Page title={`${shade.name} ${product.name}`} tint={shade.hex}>
       <motion.div animate={{ backgroundColor: tint }} transition={{ duration: 0.8 }}>
         <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-10 px-5 pb-24 pt-20 md:grid-cols-12 md:gap-12 md:px-10 md:pt-28">
           {/* gallery */}
@@ -118,7 +133,7 @@ function ProductView({ slug }: { slug: string }) {
             <nav aria-label="Breadcrumb" className="eyebrow mb-5 flex flex-wrap gap-x-2 gap-y-1 text-mute">
               <Link to="/shop" className="link-underline">Shop</Link>
               <span>/</span>
-              <Link to={`/shop?mood=${shade.mood}`} className="link-underline">{MOODS[shade.mood].title}</Link>
+              <Link to={crumb.to} className="link-underline">{crumb.label}</Link>
               <span>/</span>
               <span className="text-ink" aria-current="page">{shade.name}</span>
             </nav>
@@ -126,12 +141,12 @@ function ProductView({ slug }: { slug: string }) {
               {gallery.map((g, i) => (
                 <motion.figure
                   key={g.key}
-                  className={cx('relative w-[86vw] shrink-0 snap-center md:w-auto', i === 0 ? 'md:col-span-2 aspect-[4/5] md:aspect-[5/4]' : 'aspect-[4/5]')}
+                  className={cx('relative w-[86vw] shrink-0 snap-center md:w-auto', tee ? (g.key === 'guide' ? 'aspect-[4/5] md:aspect-square' : 'aspect-[4/5]') : i === 0 ? 'md:col-span-2 aspect-[4/5] md:aspect-[5/4]' : 'aspect-[4/5]')}
                   initial={{ clipPath: 'inset(0 0 100% 0)' }}
                   animate={{ clipPath: 'inset(0 0 0% 0)' }}
                   transition={{ duration: 1.2, ease, delay: 0.2 + i * 0.1 }}
                 >
-                  <ShadeImage photo={g.photo} crop={g.crop} tint={shade.hex} alt={g.alt} className="absolute inset-0" position={i === 0 ? '50% 28%' : '50% 50%'} priority={i === 0} sizes={i === 0 ? '(min-width: 768px) 58vw, 90vw' : '(min-width: 768px) 29vw, 90vw'} />
+                  <ShadeImage photo={g.photo} crop={g.crop} tint={shade.hex} alt={g.alt} className="absolute inset-0" position={g.position ?? '50% 50%'} priority={i === 0} sizes={i === 0 ? '(min-width: 768px) 58vw, 90vw' : '(min-width: 768px) 29vw, 90vw'} />
                   <figcaption className="eyebrow absolute bottom-3 left-3 bg-paper/90 px-2 py-1 text-[10px]">{g.label}</figcaption>
                 </motion.figure>
               ))}
@@ -142,36 +157,71 @@ function ProductView({ slug }: { slug: string }) {
           <div className="min-w-0 md:col-span-5">
             <div className="md:sticky md:top-[calc(var(--header-h)+2rem)] md:transition-[top] md:duration-500">
               <p className="eyebrow text-mute">
-                Shade {pad(idx + 1)} of {SHADES.length} · {MOODS[shade.mood].title}
+                {tee ? `Color ${pad(idx + 1)} of ${pad(range.length)} · ${LINES.tee.title}` : `Shade ${pad(idx + 1)} of ${range.length} · ${MOODS[shade.mood].title}`}
               </p>
               <h1 className="display mt-4 text-[18vw] italic md:text-[7.5vw] lg:text-[6.5rem]">
-                {shade.name.split('').map((ch, i) => (
-                  <motion.span key={i} className="inline-block" initial={{ y: '60%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.9, ease, delay: 0.15 + i * 0.035 }}>
-                    {ch}
-                  </motion.span>
-                ))}
+                {/* letters animate one by one, but each word stays on one line */}
+                {shade.name.split(' ').map((word, w, words) => {
+                  const offset = words.slice(0, w).join(' ').length + (w ? 1 : 0)
+                  return (
+                    <span key={w} className="inline-block whitespace-nowrap">
+                      {word.split('').map((ch, i) => (
+                        <motion.span key={i} className="inline-block" initial={{ y: '60%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.9, ease, delay: 0.15 + (offset + i) * 0.035 }}>
+                          {ch}
+                        </motion.span>
+                      ))}
+                      {w < words.length - 1 && ' '}
+                    </span>
+                  )
+                })}
               </h1>
               <div className="mt-3 flex items-baseline justify-between gap-4 border-b border-line pb-5">
                 <p className="text-ink-2">
-                  {product.name} · <span className="text-ink">{shade.plain}</span>
+                  {product.name}
+                  {shade.plain !== shade.name && (
+                    <>
+                      {' '}· <span className="text-ink">{shade.plain}</span>
+                    </>
+                  )}
                 </p>
                 <p className="display text-4xl">{peso(product.price)}</p>
               </div>
               <p className="display mt-5 text-2xl italic text-ink-2">“{shade.vibe}”</p>
 
+              {/* fit switcher (tees) */}
+              {tee && counterpart && (
+                <div className="mt-8">
+                  <p className="eyebrow mb-3">Fit</p>
+                  <div className="grid grid-cols-2 gap-1.5" role="list">
+                    {(product.fit === 'women' ? [product, counterpart] : [counterpart, product]).map((p) => (
+                        <Link
+                          key={p.slug}
+                          to={`/product/${p.slug}`}
+                          role="listitem"
+                          aria-current={p.slug === slug ? 'true' : undefined}
+                          className={cx('flex h-12 items-center justify-between border px-4 transition-colors', p.slug === slug ? 'border-ink bg-ink text-bone' : 'border-line hover:border-ink')}
+                        >
+                          <span className="eyebrow">{FIT_LABEL[p.fit!]}</span>
+                          <span className="font-mono text-sm">{peso(p.price)}</span>
+                        </Link>
+                      ))}
+                  </div>
+                </div>
+              )}
+
               {/* shade switcher */}
               <div className="mt-8">
                 <p className="eyebrow mb-3 flex justify-between">
-                  <span>Shade</span>
+                  <span>{tee ? 'Color' : 'Shade'}</span>
                   <span className="text-mute">{shade.name}</span>
                 </p>
                 <div className="flex flex-wrap gap-2" role="list">
-                  {PRODUCTS.map((p) => (
+                  {range.map((p) => (
                     <Link
                       key={p.slug}
                       to={`/product/${p.slug}`}
                       role="listitem"
-                      aria-label={`${p.shade.name} (${p.shade.plain})`}
+                      aria-label={colorLabel(p)}
                       aria-current={p.slug === slug ? 'true' : undefined}
                       title={p.shade.name}
                       className={cx('size-8 rounded-full transition-transform duration-300 hover:scale-110', p.slug === slug && 'ring-1 ring-ink ring-offset-[3px] ring-offset-bone')}
@@ -252,7 +302,7 @@ function ProductView({ slug }: { slug: string }) {
               >
                 Buy now
               </button>
-              <p className="mt-4 text-xs text-mute">GCash or Cash on Delivery · Ships from Quezon City{FREE_SHIPPING_MIN_QTY > 0 ? ` · Free shipping on ${FREE_SHIPPING_MIN_QTY}+ sets` : ''}</p>
+              <p className="mt-4 text-xs text-mute">GCash or Cash on Delivery · Ships from Quezon City{FREE_SHIPPING_MIN_QTY > 0 ? ` · Free shipping on ${FREE_SHIPPING_MIN_QTY}+ items` : ''}</p>
 
               {/* accordion */}
               <div className="mt-10 border-t border-line">
@@ -275,16 +325,18 @@ function ProductView({ slug }: { slug: string }) {
                 ))}
               </div>
 
-              <div className="mt-8">
-                <p className="eyebrow mb-3 text-mute">Made for</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {PRODUCT_DETAILS.professions.map((p) => (
-                    <span key={p} className="rounded-full border border-line px-3 py-1 text-xs">
-                      {p}
-                    </span>
-                  ))}
+              {!tee && (
+                <div className="mt-8">
+                  <p className="eyebrow mb-3 text-mute">Made for</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {PRODUCT_DETAILS.professions.map((p) => (
+                      <span key={p} className="rounded-full border border-line px-3 py-1 text-xs">
+                        {p}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -293,8 +345,8 @@ function ProductView({ slug }: { slug: string }) {
       {/* related */}
       <section className="mx-auto max-w-[1600px] px-5 py-24 md:px-10 md:py-32">
         <div className="mb-10 flex items-end justify-between">
-          <h2 className="display text-5xl italic md:text-6xl">Also in {MOODS[shade.mood].title}</h2>
-          <Link to={`/shop?mood=${shade.mood}`} className="eyebrow hidden border-b border-ink pb-1 md:block">
+          <h2 className="display text-5xl italic md:text-6xl">{tee ? `More ${FIT_LABEL[product.fit!].toLowerCase()}’s colors` : `Also in ${MOODS[shade.mood].title}`}</h2>
+          <Link to={crumb.to} className="eyebrow hidden border-b border-ink pb-1 md:block">
             See all
           </Link>
         </div>
@@ -308,8 +360,8 @@ function ProductView({ slug }: { slug: string }) {
       {/* prev / next shade */}
       <nav aria-label="More shades" className="grid grid-cols-2">
         {[
-          { p: prev, dir: 'Previous shade' },
-          { p: next, dir: 'Next shade' },
+          { p: prev, dir: tee ? 'Previous color' : 'Previous shade' },
+          { p: next, dir: tee ? 'Next color' : 'Next shade' },
         ].map(({ p, dir }, i) => (
           <Link key={dir} to={`/product/${p.slug}`} className={cx('group relative flex h-48 flex-col justify-end overflow-hidden p-5 md:h-72 md:p-10', i === 1 && 'items-end text-right')} style={{ background: p.shade.hex }}>
             <span className={cx('eyebrow', p.shade.on === 'light' ? 'text-bone/70' : 'text-ink/60')}>{dir}</span>
@@ -318,7 +370,7 @@ function ProductView({ slug }: { slug: string }) {
         ))}
       </nav>
 
-      <SizeGuide open={guide} onClose={() => setGuide(false)} highlight={size} />
+      <SizeGuide open={guide} onClose={() => setGuide(false)} highlight={size} guide={guideData} />
     </Page>
   )
 }

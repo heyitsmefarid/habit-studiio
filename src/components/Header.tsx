@@ -11,6 +11,7 @@ import { SHADES } from '../data/products'
 const NAV = [
   { to: '/shop', label: 'Shop' },
   { to: '/shop?mood=soft', label: 'Collections' },
+  { to: '/shop?line=tee', label: 'Tees' },
   { to: '/lookbook', label: 'Lookbook' },
   { to: '/story', label: 'Story' },
 ]
@@ -69,10 +70,13 @@ export function Header({ onSearch }: { onSearch: () => void }) {
     document.documentElement.toggleAttribute('data-header-hidden', offscreen)
   }, [offscreen])
 
-  const mood = new URLSearchParams(search).get('mood')
+  const query = new URLSearchParams(search)
+  const mood = query.get('mood')
+  const line = query.get('line')
   const isActive = (label: string) => {
-    if (label === 'Shop') return pathname === '/shop' && !mood
+    if (label === 'Shop') return pathname === '/shop' && !mood && !line
     if (label === 'Collections') return pathname === '/shop' && !!mood
+    if (label === 'Tees') return (pathname === '/shop' && line === 'tee' && !mood) || pathname.startsWith('/product/tee-')
     return pathname.startsWith(NAV.find((n) => n.label === label)!.to)
   }
 

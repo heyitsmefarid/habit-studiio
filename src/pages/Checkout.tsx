@@ -116,7 +116,7 @@ export default function Checkout() {
         <section className="flex min-h-[80vh] flex-col items-center justify-center px-5 pt-24 text-center">
           <p className="eyebrow text-mute">Checkout</p>
           <h1 className="display mt-6 text-6xl italic md:text-8xl">Your bag is empty.</h1>
-          <p className="mt-5 max-w-sm text-ink-2">Pick a shade first — then come back to pay with GCash or Cash on Delivery.</p>
+          <p className="mt-5 max-w-sm text-ink-2">Pick something first — then come back to pay with GCash or Cash on Delivery.</p>
           <div className="mt-8 flex h-2 w-64">
             {SHADES.map((s) => (
               <span key={s.id} className="flex-1" style={{ background: s.hex }} />
@@ -235,7 +235,7 @@ export default function Checkout() {
                         <StepNo n={3} />
                         <div className="text-sm text-ink-2">
                           <p className="font-medium text-ink">We verify, then ship</p>
-                          <p className="mt-1">We match your reference number with our GCash records, then pack your order. Keep your GCash receipt until your scrubs arrive.</p>
+                          <p className="mt-1">We match your reference number with our GCash records, then pack your order. Keep your GCash receipt until your order arrives.</p>
                         </div>
                       </li>
                     </ol>
@@ -281,7 +281,7 @@ export default function Checkout() {
             <div className="bg-paper p-6 lg:sticky lg:top-28 md:p-8">
               <div className="flex items-baseline justify-between">
                 <h2 className="display text-3xl italic">Your order</h2>
-                <span className="eyebrow text-mute">{t.qty} {t.qty === 1 ? 'set' : 'sets'}</span>
+                <span className="eyebrow text-mute">{t.qty} {t.qty === 1 ? 'item' : 'items'}</span>
               </div>
               <ul className="mt-6 divide-y divide-line border-y border-line">
                 {t.items.map((it) => (
@@ -293,7 +293,7 @@ export default function Checkout() {
                     <div className="flex-1">
                       <p className="display text-xl">{it.product.shade.name}</p>
                       <p className="eyebrow mt-0.5 text-mute">
-                        {it.product.shade.plain} · Size {it.size}
+                        {it.product.line === 'tee' ? it.product.name : it.product.shade.plain} · Size {it.size}
                       </p>
                     </div>
                     <p className="font-mono text-sm">{peso(it.total)}</p>
@@ -324,7 +324,7 @@ export default function Checkout() {
               </div>
               {FREE_SHIPPING_MIN_QTY > 0 && !t.freeShip && (
                 <p className="mt-4 text-xs text-mute">
-                  Add {FREE_SHIPPING_MIN_QTY - t.qty} more {FREE_SHIPPING_MIN_QTY - t.qty === 1 ? 'set' : 'sets'} for free shipping.{' '}
+                  Add {FREE_SHIPPING_MIN_QTY - t.qty} more {FREE_SHIPPING_MIN_QTY - t.qty === 1 ? 'item' : 'items'} for free shipping.{' '}
                   <Link to="/shop" className="underline underline-offset-2">
                     Keep shopping
                   </Link>
