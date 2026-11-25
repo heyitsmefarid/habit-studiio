@@ -1,0 +1,148 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/bodoni-moda';
+@import '@fontsource-variable/bodoni-moda/wght-italic.css';
+@import '@fontsource-variable/hanken-grotesk';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+@import '@fontsource/pinyon-script/400.css';
+
+@theme {
+  --color-bone: #f1ece3;
+  --color-paper: #f8f5ef;
+  --color-sand: #e4dccf;
+  --color-ink: #17150f;
+  --color-ink-2: #4b463d;
+  --color-mute: #6a6458;
+  --color-gold: #9c7f52;
+  --color-line: rgb(23 21 15 / 0.14);
+
+  --font-display: 'Bodoni Moda Variable', 'Didot', 'Bodoni 72', serif;
+  --font-sans: 'Hanken Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-script: 'Pinyon Script', cursive;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+@layer base {
+  /* height of the fixed header; 0 while it is slid away, so sticky bars follow it */
+  :root {
+    --header-h: 4rem;
+  }
+  @media (min-width: 768px) {
+    :root {
+      --header-h: 5rem;
+    }
+  }
+  :root[data-header-hidden] {
+    --header-h: 0px;
+  }
+  html {
+    background: var(--color-bone);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-stopped {
+    overflow: clip;
+  }
+  body {
+    font-family: var(--font-sans);
+    font-feature-settings: 'ss01', 'cv11';
+  }
+  ::selection {
+    background: var(--color-ink);
+    color: var(--color-bone);
+  }
+  :focus-visible {
+    outline: 1.5px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+  button {
+    cursor: pointer;
+  }
+  img {
+    -webkit-user-drag: none;
+  }
+}
+
+@layer components {
+  /* small uppercase label, like a chart tag */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .display {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.02em;
+    line-height: 0.92;
+  }
+  .hairline {
+    border-color: var(--color-line);
+  }
+  .link-underline {
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    transition: background-size 0.5s var(--ease-out-expo);
+  }
+  .link-underline:hover,
+  .link-underline:focus-visible {
+    background-size: 100% 1px;
+  }
+  .field {
+    width: 100%;
+    background: transparent;
+    border-bottom: 1px solid var(--color-line);
+    padding: 0.85rem 0 0.6rem;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-ink);
+  }
+  .field[aria-invalid='true'] {
+    border-color: #a4302a;
+  }
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.06;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
